@@ -2,18 +2,16 @@
 import { ref, onMounted, computed } from 'vue'
 import LayoutMain from '@/components/LayoutMain.vue'
 import BaseCard from '@/components/BaseCard.vue'
-import { useFinancialStore } from '@/stores/financial'
+import { calculateLoan } from '@/utils/financial-engine'  // <- directo
 import api from '@/services/api'
 import type { Client, Unit, Config, SimulationResult } from '@/types'
-
-const financialStore = useFinancialStore()
 
 const clients = ref<Client[]>([])
 const units = ref<Unit[]>([])
 const configs = ref<Config[]>([])
 const loading = ref(false)
 
-// IDs como string para empatar con db.json
+// usar string para empatar con json-server y Render
 const selectedClientId = ref<string | null>(null)
 const selectedUnitId   = ref<string | null>(null)
 const selectedConfigId = ref<string | null>(null)
@@ -21,7 +19,6 @@ const selectedConfigId = ref<string | null>(null)
 const plazoMeses = ref(240)
 const results = ref<SimulationResult | null>(null)
 
-// comparación robusta: String(a) === String(b)
 const selectedUnit = computed(() =>
     units.value.find(u => String(u.id) === String(selectedUnitId.value))
 )
@@ -54,24 +51,22 @@ async function loadData() {
 
 function simulate() {
   if (!selectedUnit.value || !selectedConfig.value) return
-  const config = selectedConfig.value
-  results.value = financialStore.calculateLoan(
+  const c = selectedConfig.value
+  results.value = calculateLoan(
       principal.value,
-      config.efectivaAnual || 0,
+      c.efectivaAnual || 0,
       plazoMeses.value,
-      config.tasaTipo,
-      // si no tienes "capitalizacion" en tu tipo, ignora este arg:
-      // @ts-expect-error - opcional/no usado en el store
-      config.capitalizacion,
-      config.graciaTipo,
-      config.graciaMeses,
-      config.capitalizaEnGracia
+      c.tasaTipo,
+      // @ts-expect-error opcional/no usado
+      c.capitalizacion,
+      c.graciaTipo,
+      c.graciaMeses,
+      c.capitalizaEnGracia
   )
 }
 
 async function saveSimulation() {
   if (!results.value || !selectedClientId.value || !selectedUnitId.value || !selectedConfigId.value) return
-
   try {
     const simulation = {
       clientId: String(selectedClientId.value),
@@ -88,7 +83,6 @@ async function saveSimulation() {
       schedule: results.value.schedule,
       createdAt: new Date().toISOString()
     }
-
     await api.post('/simulations', simulation)
     alert('Simulación guardada exitosamente')
   } catch (error) {
@@ -97,10 +91,9 @@ async function saveSimulation() {
   }
 }
 
-onMounted(() => {
-  loadData()
-})
+onMounted(loadData)
 </script>
+
 
 <template>
   <LayoutMain>

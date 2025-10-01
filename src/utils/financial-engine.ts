@@ -20,17 +20,20 @@ function irr(cfs:number[], guess=0.02){
   return r
 }
 
-/** Método francés mensual + gracia TOTAL/PARCIAL mínima */
 export function calculateLoan(
     principal: number,
     tasa: number,               // TEA %
     plazoMeses: number,
     tasaTipo: TasaTipo = 'EFECTIVA',
-    _capitalizacion?: string,
+    capitalizacion?: string,
     graciaTipo: GraciaTipo = 'NINGUNA',
     graciaMeses = 0,
     capitalizaEnGracia = false
 ): SimulationResult {
+  // Marcar como “usados” para satisfacer noUnusedParameters
+  void tasaTipo
+  void capitalizacion
+
   const i = Math.pow(1 + tasa/100, 1/12) - 1
   let saldo = principal
   const schedule: ScheduleItem[] = []
@@ -65,7 +68,6 @@ export function calculateLoan(
     })
   }
 
-  // IRR/TCEA
   const cfs = [principal, ...schedule.slice(graciaMeses).map(s=>-s.cuota)]
   const irrMensual = irr(cfs, 0.02)
   const tirAnual = Math.pow(1+irrMensual, 12)-1
