@@ -7,11 +7,7 @@ import './style.css'
 import App from './App.vue'
 
 const app = createApp(App)
-
 app.use(createPinia())
 app.use(router)
-app.use(PrimeVue, {
-  unstyled: true
-})
-
+app.use(PrimeVue, { unstyled: true })
 app.mount('#app')

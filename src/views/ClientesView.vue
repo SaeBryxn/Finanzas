@@ -55,8 +55,8 @@ function openForm(client?: Client) {
 
 async function saveClient() {
   try {
-    if (editingClient.value) {
-      await api.put(`/clients/${editingClient.value.id}`, form.value)
+    if (editingClient.value?.id != null) {
+      await api.put(`/clients/${String(editingClient.value.id)}`, form.value)
     } else {
       await api.post('/clients', form.value)
     }
@@ -68,20 +68,18 @@ async function saveClient() {
 }
 
 async function deleteClient(client: Client) {
-  if (confirm('¿Está seguro de eliminar este cliente?')) {
-    try {
-      await api.delete(`/clients/${client.id}`)
-      await loadClients()
-    } catch (error) {
-      console.error('Error deleting client:', error)
-    }
+  if (!confirm('¿Está seguro de eliminar este cliente?')) return
+  try {
+    await api.delete(`/clients/${String(client.id)}`)
+    await loadClients()
+  } catch (error) {
+    console.error('Error deleting client:', error)
   }
 }
 
-onMounted(() => {
-  loadClients()
-})
+onMounted(loadClients)
 </script>
+
 
 <template>
   <LayoutMain>

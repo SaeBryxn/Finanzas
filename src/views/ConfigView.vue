@@ -53,8 +53,8 @@ function openForm(config?: Config) {
 
 async function saveConfig() {
   try {
-    if (editingConfig.value) {
-      await api.put(`/configs/${editingConfig.value.id}`, form.value)
+    if (editingConfig.value?.id != null) {
+      await api.put(`/configs/${String(editingConfig.value.id)}`, form.value)
     } else {
       await api.post('/configs', form.value)
     }
@@ -66,19 +66,16 @@ async function saveConfig() {
 }
 
 async function deleteConfig(config: Config) {
-  if (confirm('¿Está seguro de eliminar esta configuración?')) {
-    try {
-      await api.delete(`/configs/${config.id}`)
-      await loadConfigs()
-    } catch (error) {
-      console.error('Error deleting config:', error)
-    }
+  if (!confirm('¿Está seguro de eliminar esta configuración?')) return
+  try {
+    await api.delete(`/configs/${String(config.id)}`)
+    await loadConfigs()
+  } catch (error) {
+    console.error('Error deleting config:', error)
   }
 }
 
-onMounted(() => {
-  loadConfigs()
-})
+onMounted(loadConfigs)
 </script>
 
 <template>

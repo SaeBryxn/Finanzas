@@ -20,7 +20,6 @@ async function loadData() {
       api.get('/units'),
       api.get('/configs')
     ])
-    
     simulations.value = simulationsRes.data
     clients.value = clientsRes.data
     units.value = unitsRes.data
@@ -32,35 +31,32 @@ async function loadData() {
   }
 }
 
-function getClientName(clientId: number) {
-  const client = clients.value.find(c => c.id === clientId)
-  return client ? `${client.nombres} ${client.apellidos}` : 'Cliente no encontrado'
+function getClientName(clientId: string) {
+  const c = clients.value.find(x => String(x.id) === String(clientId))
+  return c ? `${c.nombres} ${c.apellidos}` : 'Cliente no encontrado'
 }
 
-function getUnitInfo(unitId: number) {
-  const unit = units.value.find(u => u.id === unitId)
-  return unit ? `${unit.proyecto} - ${unit.torre} ${unit.unidad}` : 'Unidad no encontrada'
+function getUnitInfo(unitId: string) {
+  const u = units.value.find(x => String(x.id) === String(unitId))
+  return u ? `${u.proyecto} - ${u.torre} ${u.unidad}` : 'Unidad no encontrada'
 }
 
-function getConfigInfo(configId: number) {
-  const config = configs.value.find(c => c.id === configId)
-  return config ? `${config.entidad} - ${config.efectivaAnual}%` : 'Config no encontrada'
+function getConfigInfo(configId: string) {
+  const cfg = configs.value.find(x => String(x.id) === String(configId))
+  return cfg ? `${cfg.entidad} - ${cfg.efectivaAnual}%` : 'Config no encontrada'
 }
 
 async function deleteSimulation(simulation: Simulation) {
-  if (confirm('¿Está seguro de eliminar esta simulación?')) {
-    try {
-      await api.delete(`/simulations/${simulation.id}`)
-      await loadData()
-    } catch (error) {
-      console.error('Error deleting simulation:', error)
-    }
+  if (!confirm('¿Está seguro de eliminar esta simulación?')) return
+  try {
+    await api.delete(`/simulations/${String(simulation.id)}`)
+    await loadData()
+  } catch (error) {
+    console.error('Error deleting simulation:', error)
   }
 }
 
-onMounted(() => {
-  loadData()
-})
+onMounted(loadData)
 </script>
 
 <template>
@@ -71,21 +67,20 @@ onMounted(() => {
         <p class="text-sm text-gray-600 mt-1">Revisa todas las simulaciones realizadas</p>
       </div>
 
-      <!-- Simulations List -->
       <BaseCard>
         <div v-if="loading" class="text-center py-8">
           <i class="pi pi-spinner pi-spin text-2xl text-gray-400"></i>
         </div>
-        
+
         <div v-else-if="simulations.length === 0" class="text-center py-8 text-gray-500">
           No hay simulaciones registradas
         </div>
-        
+
         <div v-else class="space-y-4">
-          <div 
-            v-for="simulation in simulations" 
-            :key="simulation.id"
-            class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+          <div
+              v-for="simulation in simulations"
+              :key="simulation.id"
+              class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
           >
             <div class="flex items-start justify-between mb-4">
               <div>
@@ -94,56 +89,55 @@ onMounted(() => {
                 </h3>
                 <p class="text-sm text-gray-600">{{ getUnitInfo(simulation.unitId) }}</p>
                 <p class="text-xs text-gray-500 mt-1">
-                  {{ new Date(simulation.createdAt).toLocaleDateString('es-PE') }} - 
+                  {{ new Date(simulation.createdAt).toLocaleDateString('es-PE') }} -
                   {{ getConfigInfo(simulation.configId) }}
                 </p>
               </div>
               <button
-                @click="deleteSimulation(simulation)"
-                class="text-gray-400 hover:text-red-600 p-1"
+                  @click="deleteSimulation(simulation)"
+                  class="text-gray-400 hover:text-red-600 p-1"
               >
                 <i class="pi pi-trash"></i>
               </button>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div class="bg-gray-50 p-3 rounded">
                 <div class="text-gray-600 mb-1">Principal</div>
                 <div class="font-semibold">S/ {{ simulation.principal.toLocaleString() }}</div>
               </div>
-              
+
               <div class="bg-gray-50 p-3 rounded">
                 <div class="text-gray-600 mb-1">Plazo</div>
                 <div class="font-semibold">{{ simulation.plazoMeses }} meses</div>
               </div>
-              
+
               <div class="bg-primary-50 p-3 rounded">
                 <div class="text-gray-600 mb-1">Cuota Mensual</div>
-                <div class="font-semibold text-primary-600">S/ {{ simulation.resultados.cuota.toLocaleString() }}</div>
+                <div class="font-semibold text-primary-600">
+                  S/ {{ simulation.resultados.cuota.toLocaleString() }}
+                </div>
               </div>
-              
+
               <div class="bg-gray-50 p-3 rounded">
                 <div class="text-gray-600 mb-1">TCEA</div>
                 <div class="font-semibold">{{ simulation.resultados.tcea }}%</div>
               </div>
             </div>
-            
+
             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div class="flex justify-between">
                 <span class="text-gray-500">TIR:</span>
                 <span>{{ simulation.resultados.tir }}%</span>
               </div>
-              
               <div class="flex justify-between">
                 <span class="text-gray-500">Duración:</span>
                 <span>{{ simulation.resultados.duracion }}</span>
               </div>
-              
               <div class="flex justify-between">
                 <span class="text-gray-500">Dur. Mod:</span>
                 <span>{{ simulation.resultados.durMod }}</span>
               </div>
-              
               <div class="flex justify-between">
                 <span class="text-gray-500">Convexidad:</span>
                 <span>{{ simulation.resultados.convexidad }}</span>

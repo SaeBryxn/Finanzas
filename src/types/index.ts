@@ -3,7 +3,7 @@ export type TasaTipo = 'EFECTIVA' | 'NOMINAL'
 export type GraciaTipo = 'NINGUNA' | 'TOTAL' | 'PARCIAL'
 
 export interface Client {
-  id?: string | number
+  id?: string
   nombres: string
   apellidos: string
   documento: string
@@ -15,7 +15,7 @@ export interface Client {
 }
 
 export interface Unit {
-  id?: string | number
+  id?: string
   proyecto: string
   torre: string
   unidad: string
@@ -25,11 +25,11 @@ export interface Unit {
   gastos: number
   seguros: number
   comisiones: number
-  imageUrl?: string          // << NUEVO
+  imageUrl?: string
 }
 
 export interface Config {
-  id?: string | number
+  id?: string
   moneda: Moneda
   tasaTipo: TasaTipo
   efectivaAnual: number
@@ -59,8 +59,8 @@ export interface SimulationResult {
 }
 
 export interface Simulation {
-  id?: string | number
-  clientId: string       // forzamos string para evitar mismatch
+  id?: string
+  clientId: string
   unitId: string
   configId: string
   principal: number
@@ -73,4 +73,14 @@ export interface Simulation {
   resultados: SimulationResult
   schedule: ScheduleItem[]
   createdAt: string
+}
+
+export interface AuditLog {
+  id: string
+  userEmail: string
+  action: string
+  entity: string
+  entityId: string
+  payload?: any
+  timestamp: string
 }
